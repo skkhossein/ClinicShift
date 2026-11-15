@@ -1,0 +1,5 @@
+# Copy to .dev.vars locally. Never commit real credentials.
+ADMIN_API_TOKEN=replace-with-a-long-random-admin-token
+BALE_BOT_TOKEN=replace-with-bale-bot-token
+BALE_GROUP_CHAT_ID=replace-with-group-chat-id
+BALE_CHANNEL_CHAT_ID=replace-with-channel-chat-id
