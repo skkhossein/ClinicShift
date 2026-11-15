@@ -50,10 +50,20 @@ export default function App() {
     finally { setBusy(false); }
   }
 
+  useEffect(() => {
+    if (adminReady) void loadRequests().catch(error => setNotice(error instanceof Error ? error.message : "دریافت درخواست‌ها ناموفق بود"));
+  }, [adminReady, loadRequests]);
+
   async function loginAdmin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true);
-    try { await loadRequests(); setAdminReady(true); setNotice("ورود به پنل مدیریت انجام شد."); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "ورود ناموفق بود"); }
+    try {
+      const response = await fetch("/api/admin/requests", { headers: { Authorization: `Bearer ${adminToken}` } });
+      const data = await response.json() as { requests?: RequestItem[]; error?: string };
+      if (!response.ok) throw new Error(data.error || "توکن مدیر معتبر نیست");
+      setRequests(data.requests || []);
+      setAdminReady(true);
+      setNotice("ورود به پنل مدیریت انجام شد.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "ورود ناموفق بود"); }
     finally { setBusy(false); }
   }
 
