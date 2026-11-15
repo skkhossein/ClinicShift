@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { FormEvent } from "react";
 
 type Shift = { id: number; shift_date: string; period: "morning" | "afternoon"; capacity: number; booked: number; is_open: number };
 type RequestItem = { id: number; full_name: string; mobile: string; note: string | null; status: "pending" | "approved" | "rejected"; shift_date: string; period: "morning" | "afternoon"; created_at: string };
@@ -36,7 +37,7 @@ export default function App() {
 
   useEffect(() => { void loadShifts(); }, [loadShifts]);
 
-  async function submitRequest(event: React.FormEvent<HTMLFormElement>) {
+  async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true); setNotice("");
     try {
@@ -54,7 +55,7 @@ export default function App() {
     if (adminReady) void loadRequests().catch(error => setNotice(error instanceof Error ? error.message : "دریافت درخواست‌ها ناموفق بود"));
   }, [adminReady, loadRequests]);
 
-  async function loginAdmin(event: React.FormEvent<HTMLFormElement>) {
+  async function loginAdmin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true);
     try {
       const response = await fetch("/api/admin/requests", { headers: { Authorization: `Bearer ${adminToken}` } });
@@ -78,7 +79,7 @@ export default function App() {
     finally { setBusy(false); }
   }
 
-  async function createShift(event: React.FormEvent<HTMLFormElement>) {
+  async function createShift(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true);
     try {
       const response = await fetch("/api/admin/shifts", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` }, body: JSON.stringify({ ...newShift, capacity: Number(newShift.capacity) }) });
