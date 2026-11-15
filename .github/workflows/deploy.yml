@@ -11,6 +11,7 @@ permissions:
 jobs:
   deploy:
     name: Build and deploy Worker
+    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,13 +23,20 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install
+      - name: Build
+        run: npm run build
+      - name: Validate Cloudflare D1 configuration
+        shell: bash
+        run: |
+          if grep -q 'REPLACE_WITH_D1_DATABASE_ID' wrangler.jsonc; then
+            echo 'Set the real D1 database_id in wrangler.jsonc before deployment.'
+            exit 1
+          fi
       - name: Apply D1 migrations
         run: npx wrangler d1 migrations apply clinicshift-db --remote
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      - name: Build
-        run: npm run build
       - name: Deploy Worker
         run: npx wrangler deploy
         env:
