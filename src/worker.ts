@@ -12,7 +12,7 @@ type Period = "morning" | "afternoon";
 type RequestStatus = "pending" | "approved" | "rejected";
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
 const fail = (message: string, status = 400) => json({ error: message }, status);
-const validDate = (s: unknown): s is string => { if (typeof s !== "string" || !/^\\d{4}-\\d{2}-\\d{2}$/.test(s)) return false; const d = new Date(s + "T00:00:00Z"); return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === s; };
+const validDate = (s: unknown): s is string => { if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d = new Date(s + "T00:00:00Z"); return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === s; };
 const periodLabel = (p: string) => p === "morning" ? "صبح" : "بعدازظهر";
 function isAdmin(request: Request, env: Env) {
   const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
