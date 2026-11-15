@@ -12,7 +12,7 @@ type Period = "morning" | "afternoon";
 type RequestStatus = "pending" | "approved" | "rejected";
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
 const fail = (message: string, status = 400) => json({ error: message }, status);
-const validDate = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s + "T00:00:00Z"));
+const validDate = (s: unknown): s is string => { if (typeof s !== "string" || !/^\\d{4}-\\d{2}-\\d{2}$/.test(s)) return false; const d = new Date(s + "T00:00:00Z"); return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === s; };
 const periodLabel = (p: string) => p === "morning" ? "صبح" : "بعدازظهر";
 function isAdmin(request: Request, env: Env) {
   const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
@@ -52,7 +52,9 @@ async function api(request: Request, env: Env): Promise<Response> {
     if ((booked?.total || 0) >= shift.capacity) return fail("ظرفیت این شیفت تکمیل شده است.", 409);
     try {
       const result = await env.DB.prepare("INSERT INTO shift_requests (shift_id, full_name, mobile, note) VALUES (?, ?, ?, ?)").bind(shiftId, fullName, mobile, note || null).run();
-      await queueNotice(env, `درخواست جدید شیفت\nنام: ${fullName}\nهمراه: ${mobile}\nتاریخ: ${shift.shift_date}\nنوبت: ${periodLabel(shift.period)}\nوضعیت: در انتظار تأیید مدیر\nکد درخواست: ${result.meta.last_row_id}`);
+      try {
+        await queueNotice(env, `درخواست جدید شیفت\nنام: ${fullName}\nهمراه: ${mobile}\nتاریخ: ${shift.shift_date}\nنوبت: ${periodLabel(shift.period)}\nوضعیت: در انتظار تأیید مدیر\nکد درخواست: ${result.meta.last_row_id}`);
+      } catch { /* Keep the accepted request even if the notification queue is temporarily unavailable. */ }
       return json({ ok: true, id: result.meta.last_row_id, status: "pending" }, 201);
     } catch (error) {
       const message = String(error);
