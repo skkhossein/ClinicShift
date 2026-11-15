@@ -32,7 +32,10 @@ jobs:
             echo 'Set the real D1 database_id in wrangler.jsonc before deployment.'
             exit 1
           fi
-          grep -q 'database_name: clinicshift-prod' /dev/null || grep -q '"database_name": "clinicshift-prod"' wrangler.jsonc
+          grep -q '"database_name": "clinicshift-prod"' wrangler.jsonc || {
+            echo 'wrangler.jsonc must target clinicshift-prod.'
+            exit 1
+          }
       - name: Apply D1 migrations
         run: npx wrangler d1 migrations apply clinicshift-prod --remote
         env:
