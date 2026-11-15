@@ -12,8 +12,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "clinicshift-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_name": "clinicshift-prod",
+      "database_id": "cc3779af-e788-4bc3-8b62-16341350a1c4",
       "migrations_dir": "migrations"
     }
   ],
