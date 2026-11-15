@@ -43,7 +43,7 @@ npm run dev
 4. در GitHub → Settings → Secrets and variables → Actions این دو Secret را اضافه کنید:
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
-5. پس از آماده شدن D1 و Secretها، Push به `main` باعث اجرای workflow می‌شود.
+5. در Settings → Secrets and variables → Actions → Variables متغیر `CLOUDFLARE_DEPLOY_ENABLED=true` را بسازید. تا قبل از آماده‌شدن Cloudflare، این متغیر را تعریف نکنید؛ workflow در این حالت به‌صورت امن Skip می‌شود. پس از فعال‌سازی، Push به `main` باعث اجرای استقرار خواهد شد.
 
 اجرای دستی migration:
 
