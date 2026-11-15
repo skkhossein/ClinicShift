@@ -11,7 +11,7 @@
 - جلوگیری از ثبت درخواست تکراری و عبور از ظرفیت
 - صف اعلان و ارسال نتیجه به یک گروه و یک کانال بله
 - endpoint سلامت سرویس در `/api/health`
-- استقرار خودکار با GitHub Actions پس از Push به شاخه `main`
+- استقرار خودکار با GitHub Actions پس از Push به شاخه `main` (پس از فعال‌سازی صریح)
 
 ## فناوری
 
@@ -33,9 +33,11 @@ npm run dev
 
 ## راه‌اندازی Cloudflare
 
-1. در Cloudflare یک D1 Database با نام دقیق `clinicshift-db` بسازید.
-2. شناسه واقعی دیتابیس را به جای `REPLACE_WITH_D1_DATABASE_ID` در `wrangler.jsonc` قرار دهید.
-3. Secrets مربوط به Worker را تنظیم کنید:
+دیتابیس تولیدی این پروژه از قبل با نام دقیق `clinicshift-prod` ساخته شده است. شناسه آن در `wrangler.jsonc` ثبت شده است؛ نیازی به ساخت دیتابیس دیگری نیست.
+
+1. Binding با نام `DB` در `wrangler.jsonc` به دیتابیس `clinicshift-prod` متصل است.
+2. ساختار اولیه دیتابیس در داشبورد Cloudflare ایجاد شده است. فایل `migrations/0001_init.sql` از `IF NOT EXISTS` استفاده می‌کند تا بتوان آن را با Wrangler برای ثبت تاریخچه migration نیز اعمال کرد. پیش از اجرای workflow، باید مطمئن شوید همین نسخه فایل روی همین دیتابیس اعمال می‌شود.
+3. Secrets مربوط به Worker را در تنظیمات Worker تنظیم کنید:
    - `ADMIN_API_TOKEN`
    - `BALE_BOT_TOKEN`
    - `BALE_GROUP_CHAT_ID`
@@ -43,12 +45,14 @@ npm run dev
 4. در GitHub → Settings → Secrets and variables → Actions این دو Secret را اضافه کنید:
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
-5. در Settings → Secrets and variables → Actions → Variables متغیر `CLOUDFLARE_DEPLOY_ENABLED=true` را بسازید. تا قبل از آماده‌شدن Cloudflare، این متغیر را تعریف نکنید؛ workflow در این حالت به‌صورت امن Skip می‌شود. پس از فعال‌سازی، Push به `main` باعث اجرای استقرار خواهد شد.
+5. فقط پس از تکمیل و بررسی موارد بالا، در Settings → Secrets and variables → Actions → Variables متغیر `CLOUDFLARE_DEPLOY_ENABLED=true` را بسازید. تا قبل از آن، workflow به‌صورت امن Skip می‌شود.
+
+API Token کلودفلر باید حداقل مجوزهای لازم برای استقرار Workers و اعمال D1 migrations را داشته باشد. توکن را در مخزن یا گفتگو قرار ندهید.
 
 اجرای دستی migration:
 
 ```bash
-npx wrangler d1 migrations apply clinicshift-db --remote
+npx wrangler d1 migrations apply clinicshift-prod --remote
 ```
 
 ## API
