@@ -10,8 +10,9 @@ permissions:
 
 jobs:
   deploy:
+    # Enable this repository variable only after Cloudflare is configured.
+    if: ${{ vars.CLOUDFLARE_DEPLOY_ENABLED == 'true' }}
     name: Build and deploy Worker
-    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
